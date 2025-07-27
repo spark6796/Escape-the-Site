@@ -116,6 +116,48 @@
                 text: 'YOU ARE FAKE'
             }
         )
+        .to(panel_text_container,
+            {
+                duration:1,
+                delay:2,
+                scrambleText:{
+                    text:'🔒 Lockdown initiated 🔒',
+                    chars: "xX",
+                },
+            }
+        )
+        .to(panel_text_container,
+            {
+                duration:3,
+                delay:1,
+                text:'Welcome fellow intruder, Now you are stuck.',
+
+            }
+        )
+        .call(()=>{
+            let panel_main = document.getElementById('panel_main')
+            gsap.to(panel_main,{opacity:0,duration:3})
+        })
+        .to(
+            panel_text_container,
+            {
+                duration:3,
+                delay: 1,
+                text:'You want to exit? Lets play some games first'
+            }
+        )
+        .to(
+            panel_text_container,
+            {
+                scale:50,
+                scrambleText:{
+                    chars: "Ha",
+                },
+                delay:3,
+                opacity:0,
+                duration:4
+            }
+        )
     }
 
 
@@ -224,6 +266,8 @@
 
     }
     onMount(()=>{
+        LoadPanel()
+        return
         StartPreTitleAnimation(()=>{
             StartTitleAnimation()
         })
@@ -233,7 +277,7 @@
 
 <div class="h-screen w-full overflow-hidden bg-black">
 
-<div id="starter" class="flex justify-center items-center overflow-hidden h-screen w-full bg-black">
+<div hidden id="starter" class="flex justify-center items-center overflow-hidden h-screen w-full bg-black">
     
     <!-- PRE GAME ANIMATION START ---------- -->
     <div id="pre_title" class="flex flex-col gap-20 justify-center items-center h-full w-full">
@@ -284,7 +328,7 @@
 
 <div hidden id="panel" class="h-screen w-full overflow-hidden bg-black" style="{!alert_panel ? 'background: radial-gradient(circle,rgba(0, 0, 0, 1) 24%, rgba(0, 6, 41, 1) 84%);': 'background: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgb(41, 0, 0) 99%)'}">
 
-    <div class="flex justify-center items-center text-6xl font-bold {!alert_panel ? 'text-blue-400' : 'text-red-800'} h-1/4">
+    <div id="panel_main" class="flex justify-center items-center text-6xl font-bold {!alert_panel ? 'text-blue-400' : 'text-red-800'} h-1/4">
         <img hidden={!alert_panel ? true : false} src="alarm.gif" alt="🚨" class="h-full w-1/3 animate-pulse"/>
         <div id="panel_title" class="w-full text-center {alert_panel ? 'animate-pulse':''}"></div>  
         <img hidden={!alert_panel ? true : false} src="alarm.gif" alt="🚨" class="h-full w-1/3 animate-pulse"/>
