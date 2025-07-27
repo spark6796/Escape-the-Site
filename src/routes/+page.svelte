@@ -5,6 +5,9 @@
     import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
     import {TextPlugin} from "gsap/TextPlugin";
     import { onMount } from 'svelte';
+
+    let alert_panel = $state(false)
+
     gsap.registerPlugin(
         ScrambleTextPlugin,
         Physics2DPlugin,
@@ -33,10 +36,112 @@
     }
     };
 
+    function LoadPanel(){
+        let panel = document.getElementById('panel')
+        panel.hidden = false
+        gsap.fromTo(
+            panel,
+            {
+                opacity:0
+            },
+
+            {
+                opacity:1,
+                delay:1,
+                duration:3,
+                onComplete:(()=>{
+                    StartPanelAnimations()
+                })
+            }
+        )
+    }
+
+    function StartPanelAnimations(){
+        let panel_title_container = document.getElementById('panel_title')
+        gsap.to(
+            panel_title_container,
+            {
+                duration:3,
+                scrambleText:{
+                    text:'ADMIN DASHBOARD',
+                    chars: "X",
+                },
+
+                onComplete:(()=>{
+                    StartPanelTextAnimation()
+                })
+            }
+        )
+    }
+
+    function StartPanelTextAnimation(){
+        let panel_text_container = document.getElementById('panel_text')
+        const tl = gsap.timeline({
+            onComplete:(()=>{
+                
+            })
+        });
+        tl.to(
+            panel_text_container,
+            {
+                duration:3,
+                text:'Welcome Admin.',
+            }
+        )
+        .to(panel_text_container,
+            {
+                duration:0,
+                delay:1,
+                text: 'Verifying.'
+            }
+        )
+        .to(panel_text_container,
+            {
+                duration:1,
+                text: 'Verifying..'
+            }
+        )
+        .to(panel_text_container,
+            {
+                duration:1,
+                text: 'Verifying...'
+            }
+        )
+        .call(()=>{
+            alert_panel = true
+        })
+        .to(panel_text_container,
+            {
+                duration:1,
+                text: 'YOU ARE FAKE'
+            }
+        )
+    }
+
+
     function StartLoaderAnimation(){
         let loader_element = document.getElementById('loader')
         loader_element.hidden = false 
-        gsap.to(loader_element,{opacity:1,delay:1, duration:3})
+        gsap.to(
+            loader_element,
+            {
+                opacity:1,
+                delay:1,
+                duration:1,
+                onComplete:(()=>{
+                    gsap.to(
+                        loader_element,
+                        {
+                            opacity:0,
+                            duration:1,
+                            onComplete:(()=>{
+                                document.getElementById('starter').hidden = true
+                                LoadPanel()
+                            })
+                        }
+                    )
+                })
+            })
     }
 
     function StartPreTitleAnimation(OnCompleteCallback){
@@ -66,6 +171,7 @@
         .to(main_text, {
             opacity: 0,
             duration: 4,
+            ease: "power4.in",
             physics2D: { gravity: 400 }
         });
 
@@ -118,7 +224,6 @@
 
     }
     onMount(()=>{
-        
         StartPreTitleAnimation(()=>{
             StartTitleAnimation()
         })
@@ -126,7 +231,9 @@
     })
 </script>
 
-<div class="flex justify-center items-center overflow-hidden h-screen w-full bg-black">
+<div class="h-screen w-full overflow-hidden bg-black">
+
+<div id="starter" class="flex justify-center items-center overflow-hidden h-screen w-full bg-black">
     
     <!-- PRE GAME ANIMATION START ---------- -->
     <div id="pre_title" class="flex flex-col gap-20 justify-center items-center h-full w-full">
@@ -172,6 +279,23 @@
     </div>
 
 </div>
+    
 
+
+<div hidden id="panel" class="h-screen w-full overflow-hidden bg-black" style="{!alert_panel ? 'background: radial-gradient(circle,rgba(0, 0, 0, 1) 24%, rgba(0, 6, 41, 1) 84%);': 'background: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgb(41, 0, 0) 99%)'}">
+
+    <div class="flex justify-center items-center text-6xl font-bold {!alert_panel ? 'text-blue-400' : 'text-red-800'} h-1/4">
+        <img hidden={!alert_panel ? true : false} src="alarm.gif" alt="🚨" class="h-full w-1/3 animate-pulse"/>
+        <div id="panel_title" class="w-full text-center {alert_panel ? 'animate-pulse':''}"></div>  
+        <img hidden={!alert_panel ? true : false} src="alarm.gif" alt="🚨" class="h-full w-1/3 animate-pulse"/>
+    </div>
+    <div class="flex justify-center items-center h-3/4 w-full text-white text-4xl font-bold">
+        <div id="panel_text" class="border-8 {!alert_panel ? 'border-blue-900 bg-blue-950' : 'border-red-900 bg-red-950'}  p-10 rounded-2xl">
+            
+        </div>
+    </div>
+</div>
+
+</div>
 
 
