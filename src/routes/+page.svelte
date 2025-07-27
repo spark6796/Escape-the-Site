@@ -165,6 +165,11 @@
 
     <!-- PRE GAME ANIMATION END ---------- -->
 
+    <div id="loader" class="h-1/4">
+            <svg aria-hidden="true" class="w-full h-full animate-spin fill-blue-600 shadow-2xl shadow-blue-700 rounded-full" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+            </svg>
+    </div>
+
 </div>
 
 
