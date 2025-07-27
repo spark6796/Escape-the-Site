@@ -33,94 +33,95 @@
     }
     };
 
-    function StartGameAnimation(){
-        let delayCounter = 0;
-        for (const layer in Things){
-            for (const char in Things[layer]){
-                        
-                        const char_element = document.getElementById(char)
-                        const angle = Math.random() * 360;
-                        const velocity = 20 + Math.random() * 200;
-                        gsap.to(
-                            char_element,
-                            {
-                                physics2D: 
-                                    {velocity: velocity,angle:angle,gravity:-400},
-                                duration: 5,
-                                opacity:0,
-                                ease: "power2.in",
-                                delay: delayCounter/10,
-                                onComplete:(()=>{
-                                    let credit_element = document.getElementById('credit')
-                                    gsap.to(credit_element,{opacity:0})
-                                })
-                            }
-
-                        )   
-                        delayCounter += 2             
-                    }
-
-                }
+    function StartLoaderAnimation(){
+        let loader_element = document.getElementById('loader')
+        loader_element.hidden = false 
+        gsap.to(loader_element,{opacity:1,delay:1, duration:3})
     }
-    onMount(()=>{
-        return
+
+    function StartPreTitleAnimation(OnCompleteCallback){
         let main_text = document.getElementById('main_text')
         let headphone_text = document.getElementById('headphone_text')
       
-        gsap.to(
-            main_text,
-            {
-                opacity:1,
-                duration:5, 
-
-                text: "🚨 This site contains Flashing lights and Jumpscares. 🚨",
-                onComplete:(()=>{
-                    gsap.to(
-                    headphone_text,
-                    {
-                        opacity:1,
-                        duration:3,
-                    }
-                )
-                })
+        const tl = gsap.timeline({
+            onComplete: () => {
+                document.getElementById('pre_title').hidden = true;
+                OnCompleteCallback();
             }
-        )
-        gsap.to(
-            main_text,
-           {
-                opacity:0,
-                physics2D: 
-                {  gravity: 400 },
-                duration:4
-                ,delay:8,
-                onStart:(()=>{
-                    let headphone_text = document.getElementById('headphone_text')
-                    gsap.to(
-                        headphone_text,
-                        {opacity:0,
-                            duration:1,
-                        }
-                    )
-                }),
-                onComplete: (()=>{
-                    document.getElementById('pre_title').hidden = true
-                    let title_element = document.getElementById('title')
-                    title_element.hidden = false
-                    gsap.to(
-                        title_element,
-                        {
-                            opacity:1,
-                            duration:4,
-                            onComplete:(()=>{
-                                StartGameAnimation()
-                            })
-                        }
-                    )
-                })
+        });
 
-           }
-        )
+        tl.to(main_text, {
+            opacity: 1,
+            duration: 5,
+            text: "🚨 This site contains Flashing lights and Jumpscares. 🚨",
+        })
+        .to(headphone_text, {
+            opacity: 1,
+            duration: 3,
+        })
+        .to(headphone_text, {
+            opacity: 0,
+            duration: 1,
+        })
+        .to(main_text, {
+            opacity: 0,
+            duration: 4,
+            physics2D: { gravity: 400 }
+        });
 
+    }
+
+    function StartTitleAnimation(){
+        const title_element = document.getElementById('title');
+        const credit_element = document.getElementById('credit');
+
+        title_element.hidden = false
+
+        const tl = gsap.timeline();
+
+        tl.to(title_element, {
+            opacity: 1,
+            duration: 4
+        });
+
+        let delayCounter = 0;
+        for (const layer in Things) {
+            for (const char in Things[layer]) {
+                const char_element = document.getElementById(char);
+                const angle = Math.random() * 360;
+                const velocity = 20 + Math.random() * 200;
+
+                tl.to(char_element, {
+                    physics2D: {
+                        velocity: velocity,
+                        angle: angle,
+                        gravity: -400
+                    },
+                    duration: 3,
+                    opacity: 0,
+                    ease: "power2.in",
+                    delay:3
+                },delayCounter/10);
+
+                delayCounter += 1;
+            }
+        }
+
+        tl.to(credit_element, {
+            opacity: 0,
+            onComplete: () => {
+                title_element.hidden = true;
+                StartLoaderAnimation();
+            }
+        });
+
+
+    }
+    onMount(()=>{
+        
+        StartPreTitleAnimation(()=>{
+            StartTitleAnimation()
+        })
 
     })
 </script>
@@ -128,7 +129,7 @@
 <div class="flex justify-center items-center overflow-hidden h-screen w-full bg-black">
     
     <!-- PRE GAME ANIMATION START ---------- -->
-    <div hidden id="pre_title" class="flex flex-col gap-20 justify-center items-center h-full w-full">
+    <div id="pre_title" class="flex flex-col gap-20 justify-center items-center h-full w-full">
         <div id="main_text" class="opacity-0 font-bold text-4xl text-red-500"></div> 
         <div id="headphone_text" class="text-white opacity-0 font-bold text-3xl">
         🎧 Use headphones for best experience 🎧
@@ -165,7 +166,7 @@
 
     <!-- PRE GAME ANIMATION END ---------- -->
 
-    <div id="loader" class="h-1/4">
+    <div hidden id="loader" class="h-1/4 opacity-0">
             <svg aria-hidden="true" class="w-full h-full animate-spin fill-blue-600 shadow-2xl shadow-blue-700 rounded-full" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
             </svg>
     </div>
