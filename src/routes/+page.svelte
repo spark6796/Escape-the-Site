@@ -7,7 +7,7 @@
     import { onMount } from 'svelte';
 
     let alert_panel = $state(false)
-
+    let exit_buttons_shadow = $state('shadow-red-400')
     gsap.registerPlugin(
         ScrambleTextPlugin,
         Physics2DPlugin,
@@ -35,6 +35,31 @@
         e4: 'E'
     }
     };
+    function StartExitButtonPuzzle(){
+        document.getElementById('exit_button_container').hidden = false
+        let my_popping_list = [...Array(9).keys()].map(n => n + 1)
+        for (let i = my_popping_list.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+            [my_popping_list[i], my_popping_list[j]] = [my_popping_list[j], my_popping_list[i]];
+        }
+        for (const exit_button_id of my_popping_list){
+            let exit_button = document.getElementById('exit_'+exit_button_id)
+            gsap.to(exit_button,
+                {
+                    opacity:1,
+                    duration:2,
+                    delay:1 + Math.random() * 2,
+                    scrambleText:{
+                        text:'EXIT',
+                        chars: "X",
+                    },
+                }
+            )
+        }
+        setTimeout(() => {
+            exit_buttons_shadow = "shadow-red-700"
+        }, 4500);
+    }
 
     function LoadPanel(){
         let panel = document.getElementById('panel')
@@ -78,7 +103,9 @@
         let panel_text_container = document.getElementById('panel_text')
         const tl = gsap.timeline({
             onComplete:(()=>{
-                
+                document.getElementById('panel_text_parent').hidden = true;
+                document.getElementById('panel_main').hidden = true;
+                StartExitButtonPuzzle()
             })
         });
         tl.to(
@@ -266,8 +293,6 @@
 
     }
     onMount(()=>{
-        LoadPanel()
-        return
         StartPreTitleAnimation(()=>{
             StartTitleAnimation()
         })
@@ -277,68 +302,81 @@
 
 <div class="h-screen w-full overflow-hidden bg-black">
 
-<div hidden id="starter" class="flex justify-center items-center overflow-hidden h-screen w-full bg-black">
-    
-    <!-- PRE GAME ANIMATION START ---------- -->
-    <div id="pre_title" class="flex flex-col gap-20 justify-center items-center h-full w-full">
-        <div id="main_text" class="opacity-0 font-bold text-4xl text-red-500"></div> 
-        <div id="headphone_text" class="text-white opacity-0 font-bold text-3xl">
-        🎧 Use headphones for best experience 🎧
+    <div id="starter" class="flex justify-center items-center overflow-hidden h-screen w-full bg-black">
+        
+        <!-- PRE GAME ANIMATION START ---------- -->
+        <div id="pre_title" class="flex flex-col gap-20 justify-center items-center h-full w-full">
+            <div id="main_text" class="opacity-0 font-bold text-4xl text-red-500"></div> 
+            <div id="headphone_text" class="text-white opacity-0 font-bold text-3xl">
+            🎧 Use headphones for best experience 🎧
+            </div>
         </div>
+        <div id="title" hidden class="flex flex-col justify-center items-center gap-10 font-bold text-9xl text-white h-full w-1/2 opacity-0">
+            <div class="flex">
+                {#each Object.entries(Things.First) as [id, char]}
+                    <div id={id}>
+                    {char}
+                    </div>
+                {/each}
+            </div> 
+            <div class="flex text-7xl">
+                {#each Object.entries(Things.Second) as [id, char]}
+                    <div id={id}>
+                    {char}
+                    </div>
+                {/each}
+            </div> 
+            <div class="flex">
+                {#each Object.entries(Things.Third) as [id, char]}
+                    <div id={id}>
+                    {char}
+                    </div>
+                {/each}
+            </div>
+
+            <div id="credit" class="text-3xl"> 
+                by Spark
+            </div>
+
+        </div>
+
+        <!-- PRE GAME ANIMATION END ---------- -->
+
+        <div hidden id="loader" class="h-1/4 opacity-0">
+                <svg aria-hidden="true" class="w-full h-full animate-spin fill-blue-600 shadow-2xl shadow-blue-700 rounded-full" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                </svg>
+        </div>
+
     </div>
-    <div id="title" hidden class="flex flex-col justify-center items-center gap-10 font-bold text-9xl text-white h-full w-1/2 opacity-0">
-        <div class="flex">
-            {#each Object.entries(Things.First) as [id, char]}
-                <div id={id}>
-                {char}
+        
+
+
+    <div hidden id="panel" class="h-screen w-full overflow-hidden bg-black" style="{!alert_panel ? 'background: radial-gradient(circle,rgba(0, 0, 0, 1) 24%, rgba(0, 6, 41, 1) 84%);': 'background: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgb(41, 0, 0) 99%)'}">
+
+        <div hidden id="exit_button_container" class="h-full w-full border-2">
+            {#each {length: 3} , i}
+                <div class="flex h-1/3 w-full text-white">
+                    {#each {length: 3} , j}
+                        <div class="flex justify-center items-center h-full w-1/3">
+                            <!-- svelte-ignore a11y_consider_explicit_label -->
+                            <button id={`exit_${j+1 + (i * 3)}`} class="border-8 opacity-0 w-1/2 h-1/2 shadow-2xl {exit_buttons_shadow} rounded-4xl border-red-900 bg-red-950 font-bold text-5xl hover:border-red-500"></button>
+                        </div>
+                    {/each}
                 </div>
             {/each}
-        </div> 
-        <div class="flex text-7xl">
-            {#each Object.entries(Things.Second) as [id, char]}
-                <div id={id}>
-                {char}
-                </div>
-            {/each}
-        </div> 
-        <div class="flex">
-            {#each Object.entries(Things.Third) as [id, char]}
-                <div id={id}>
-                {char}
-                </div>
-            {/each}
         </div>
 
-        <div id="credit" class="text-3xl"> 
-            by Spark
+        <div id="panel_main" class="flex justify-center items-center text-6xl font-bold {!alert_panel ? 'text-blue-400' : 'text-red-800'} h-1/4">
+            <img hidden={!alert_panel ? true : false} src="alarm.gif" alt="🚨" class="h-full w-1/3 animate-pulse"/>
+            <div id="panel_title" class="w-full text-center {alert_panel ? 'animate-pulse':''}"></div>  
+            <img hidden={!alert_panel ? true : false} src="alarm.gif" alt="🚨" class="h-full w-1/3 animate-pulse"/>
         </div>
-
-    </div>
-
-    <!-- PRE GAME ANIMATION END ---------- -->
-
-    <div hidden id="loader" class="h-1/4 opacity-0">
-            <svg aria-hidden="true" class="w-full h-full animate-spin fill-blue-600 shadow-2xl shadow-blue-700 rounded-full" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-            </svg>
-    </div>
-
-</div>
-    
-
-
-<div hidden id="panel" class="h-screen w-full overflow-hidden bg-black" style="{!alert_panel ? 'background: radial-gradient(circle,rgba(0, 0, 0, 1) 24%, rgba(0, 6, 41, 1) 84%);': 'background: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgb(41, 0, 0) 99%)'}">
-
-    <div id="panel_main" class="flex justify-center items-center text-6xl font-bold {!alert_panel ? 'text-blue-400' : 'text-red-800'} h-1/4">
-        <img hidden={!alert_panel ? true : false} src="alarm.gif" alt="🚨" class="h-full w-1/3 animate-pulse"/>
-        <div id="panel_title" class="w-full text-center {alert_panel ? 'animate-pulse':''}"></div>  
-        <img hidden={!alert_panel ? true : false} src="alarm.gif" alt="🚨" class="h-full w-1/3 animate-pulse"/>
-    </div>
-    <div class="flex justify-center items-center h-3/4 w-full text-white text-4xl font-bold">
-        <div id="panel_text" class="border-8 {!alert_panel ? 'border-blue-900 bg-blue-950' : 'border-red-900 bg-red-950'}  p-10 rounded-2xl">
-            
+        <div id="panel_text_parent" class="flex justify-center items-center h-3/4 w-full text-white text-4xl font-bold">
+            <div id="panel_text" class="border-8 {!alert_panel ? 'border-blue-900 bg-blue-950' : 'border-red-900 bg-red-950'}  p-10 rounded-2xl">
+                
+            </div>
         </div>
     </div>
-</div>
 
 </div>
 
