@@ -1,4 +1,3 @@
-
 <script>
     import { gsap } from "gsap";
     import { Physics2DPlugin } from "gsap/Physics2DPlugin";
@@ -6,6 +5,7 @@
     import {TextPlugin} from "gsap/TextPlugin";
     import { onMount } from 'svelte';
 
+    let exit_button_counter = 0
     let alert_panel = $state(false)
     let exit_buttons_shadow = $state('shadow-red-400')
     gsap.registerPlugin(
@@ -58,6 +58,8 @@
         }
         setTimeout(() => {
             exit_buttons_shadow = "shadow-red-700"
+            document.getElementById('flashbangs_container').hidden = false
+            document.getElementById('non_clickable_overlay').hidden = true
         }, 4500);
     }
 
@@ -292,6 +294,90 @@
 
 
     }
+
+    function ExitButtonCallback(button_id){
+        let button = document.getElementById(`exit_${button_id}`)
+        let flashbang = document.getElementById(`flashbang_${button_id}`)
+
+        exit_button_counter++;
+        const tl = gsap.timeline({
+            onComplete: () => {
+                let tictactoe = document.getElementById('tictactoe')
+                tictactoe.hidden = false
+                gsap.to(
+                    tictactoe,
+                    {
+                        opacity:1,
+                        delay:4,
+                        duration:2
+                    }
+                )
+            }
+        });
+
+        if (exit_button_counter == 1){
+            let white_screen = document.getElementById('white_screen')
+
+            tl.to(button,
+                {
+                    rotateX: 90,
+                    rotateY: 360,
+                    rotateZ: 20,
+                    opacity: 0,
+                    duration:1,
+                })
+            .call(()=>{flashbang.classList.add('z-40')})
+            .to(
+                flashbang,
+                    {
+                        scale: 5,
+                        rotate:360,
+                    }
+            )
+            .call(()=>{white_screen.hidden = false; flashbang.hidden = true})
+            .fromTo(white_screen,
+                {
+                    opacity:1,
+                },
+                {
+                    opacity:0,
+                    duration:3
+                }
+            )
+            .call(()=>{button.hidden=true;white_screen.hidden=true})
+
+        }
+        else{
+            let panel = document.getElementById('panel')
+            flashbang.hidden = true;
+            let jumpscare = document.getElementById('jumpscare')
+
+            tl.to(button,
+                {
+                    rotateX: 90,
+                    rotateY: 360,
+                    rotateZ: 20,
+                    opacity: 0,
+                    duration:1,
+            })
+            .call(()=>{
+                panel.hidden=true
+                jumpscare.hidden = false
+            })
+            .to(
+                jumpscare,
+                {
+                    opacity:1,
+                    duration:1,
+                    onComplete:(()=>jumpscare.hidden=true)
+                }
+            )
+            
+        }
+        
+    }
+
+
     onMount(()=>{
         StartPreTitleAnimation(()=>{
             StartTitleAnimation()
@@ -299,6 +385,18 @@
 
     })
 </script>
+
+<div id="non_clickable_overlay" class="absolute top-0 h-full w-full z-30"></div>
+<div hidden id="white_screen" class="absolute top-0 h-full w-full flasher z-40 bg-white"></div>
+<video
+  id="jumpscare"
+  src="/jumpscare.mp4"
+  autoplay
+  loop
+  muted
+  hidden
+  class="absolute z-40 top-0 w-full h-full object-cover opacity-0"
+></video>
 
 <div class="h-screen w-full overflow-hidden bg-black">
 
@@ -357,9 +455,23 @@
             {#each {length: 3} , i}
                 <div class="flex h-1/3 w-full text-white">
                     {#each {length: 3} , j}
-                        <div class="flex justify-center items-center h-full w-1/3">
+                        <div class="flex justify-center items-center h-full w-1/3 z-20">
                             <!-- svelte-ignore a11y_consider_explicit_label -->
-                            <button id={`exit_${j+1 + (i * 3)}`} class="border-8 opacity-0 w-1/2 h-1/2 shadow-2xl {exit_buttons_shadow} rounded-4xl border-red-900 bg-red-950 font-bold text-5xl hover:border-red-500"></button>
+                            <button onclick={()=>ExitButtonCallback(j+1 + (i * 3))} id={`exit_${j+1 + (i * 3)}`} class="border-8 w-1/2 h-1/2 opacity-0 shadow-2xl {exit_buttons_shadow} rounded-4xl border-red-900 bg-red-950 font-bold text-5xl hover:border-red-500">
+                            Exit
+                            </button>
+                        </div>
+                    {/each}
+                </div>
+            {/each}
+        </div>
+
+        <div hidden id="flashbangs_container" class="absolute top-0 h-full w-full border-2 overflow-hidden">
+            {#each {length: 3} , i}
+                <div class="flex h-1/3 w-full text-white">
+                    {#each {length: 3} , j}
+                        <div class="flex justify-center items-center h-full w-1/3">
+                            <img id={`flashbang_${j+1 + (i * 3)}`} src="flashbang.png" alt="" class="h-1/2">
                         </div>
                     {/each}
                 </div>
@@ -376,6 +488,9 @@
                 
             </div>
         </div>
+    </div>
+
+    <div hidden id="tictactoe" class="h-screen w-full overflow-hidden bg-black opacity-0" style="background: radial-gradient(circle, rgba(0, 0, 0, 1) 60%, rgb(41, 0, 0) 99%)">
     </div>
 
 </div>
